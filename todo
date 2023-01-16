@@ -1,0 +1,6 @@
+Try to get each word insdead of a whole paragraph from ChatGPT, to faster implement the Say -->  https://github.com/transitive-bullshit/chatgpt-api/blob/main/docs/classes/ChatGPTAPI.md#sendmessage
+
+
+Implement Speech to text
+
+Create a reminder that the conversation can continue

@@ -1,65 +1,54 @@
 import { ChatGPTAPIBrowser } from 'chatgpt'
-import * as dotenv from 'dotenv'
 import express, { response } from 'express'
-dotenv.config()
-import say from 'say'
+const app = express()
+app.use(express.json())
 
+import say from 'say'
+import * as dotenv from 'dotenv'
+dotenv.config()
+
+// Add your OpenAI ChatGPT credentials into the .env file
 const api = new ChatGPTAPIBrowser({
   email: process.env.OPENAI_EMAIL,
   password: process.env.OPENAI_PASSWORD,
 })
 await api.initSession()
 
-const app = express()
-app.use(express.json())
-
 let data
-
-app.get('/api/say', async (req, res) => {
-  try {
-    say.speak("Hello World!")
-    res.json({ status: 'ok' })
-  } catch (err) {
-    console.error(err)
-    res.status(500).send('Error reinitializing')
-  }
-})
 
 app.get('/api/reinit', async (req, res) => {
   try {
     await api.initSession()
-    console.log('\n#### REINITIALIZING ####')
+    console.log('\n Restarting.....')
     console.log('Continuing conversation...')
-    res.json({ status: 'ok' })
+    res.json({status:'ok'})
   } catch (err) {
     console.error(err)
-    res.status(500).send('Error reinitializing')
+    res.status(500).send('Error Reinitializing')
   }
 })
 
 app.get('/api/reset', (req, res) => {
   data = undefined
-  console.log('\n#### RESET the connection ####')
-  res.json({ status: 'ok' })
+  console.log('\n Resetting.....')
+  res.json({status:'ok'})
 })
 
 app.post('/api/chat', async (req, res) => {
   try {
     const { message } = req.body
-    console.log('\nQ: ' + message)
+    console.log('\nQuestion: \n' + message)
 
     data = await api.sendMessage(
       message,
       data
-        ? {
-            conversationId: data.conversationId,
-            parentMessageId: data.messageId,
-          }
-        : {}
+        ? { conversationId: data.conversationId,
+            parentMessageId: data.messageId } : {}
     )
-    console.log('\nA: ' + data.response)
+    console.log('\nAnswer: \n' + data.response)
     say.speak(data.response)
     res.json(data)
+   // say.speak('Is there anything else you would like to ask?')
   } catch (err) {
     console.error(err)
     res.status(500).send('Error sending / receiving message')
@@ -67,7 +56,7 @@ app.post('/api/chat', async (req, res) => {
 })
 
 app.listen(process.env.PORT, process.env.HOST, () =>
-  console.log('Server listening on port 3000')
+  console.log('Server running on port ' + process.env.PORT)
 )
 
 
