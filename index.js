@@ -1,52 +1,30 @@
-import { ChatGPTAPIBrowser } from 'chatgpt'
 import express, { response } from 'express'
+import ChatGPT from "chatgpt-official";
 const app = express()
+import cors from 'cors'
 app.use(express.json())
+app.use(cors())
 
 import say from 'say'
 import * as dotenv from 'dotenv'
 dotenv.config()
 
 // Add your OpenAI ChatGPT credentials into the .env file
-const api = new ChatGPTAPIBrowser({
-  email: process.env.OPENAI_EMAIL,
-  password: process.env.OPENAI_PASSWORD,
-})
-await api.initSession()
 
-let data
+let bot = new ChatGPT(process.env.API_KEY);
 
-app.get('/api/reinit', async (req, res) => {
-  try {
-    await api.initSession()
-    console.log('\n Restarting.....')
-    console.log('Continuing conversation...')
-    res.json({status:'ok'})
-  } catch (err) {
-    console.error(err)
-    res.status(500).send('Error Reinitializing')
-  }
-})
 
-app.get('/api/reset', (req, res) => {
-  data = undefined
-  console.log('\n Resetting.....')
-  res.json({status:'ok'})
-})
 
 app.post('/api/chat', async (req, res) => {
   try {
     const { message } = req.body
     console.log('\nQuestion: \n' + message)
 
-    data = await api.sendMessage(
-      message,
-      data
-        ? { conversationId: data.conversationId,
-            parentMessageId: data.messageId } : {}
+    let data = await bot.ask(
+      message
     )
-    console.log('\nAnswer: \n' + data.response)
-    say.speak(data.response)
+    console.log('\nAnswer: \n' + data)
+    say.speak(data)
     res.json(data)
    // say.speak('Is there anything else you would like to ask?')
   } catch (err) {
@@ -56,8 +34,8 @@ app.post('/api/chat', async (req, res) => {
 })
 
 app.listen(process.env.PORT, process.env.HOST, () =>
-  console.log('Server running on port ' + process.env.PORT)
-)
+  console.log("Server running on port " + process.env.PORT)
+);
 
 
 
