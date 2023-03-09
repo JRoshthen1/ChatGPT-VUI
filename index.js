@@ -38,11 +38,7 @@ app.listen(process.env.PORT, process.env.HOST, () =>
 );
 
 
-
-
-// automatically pick platform
-
- 
+// automatically pick platform with say
 // or, override the platform
 // const Say = require('say').Say
 // const say = new Say('darwin' || 'win32' || 'linux')
